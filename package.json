@@ -1,0 +1,19 @@
+{
+  "name": "drachtio-http-authenticator",
+  "version": "0.0.1",
+  "description": "a drachtio middleware package that delegates sip authentication to a customer-supplied http api",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "drachtio",
+    "sip"
+  ],
+  "author": "Dave Horton",
+  "license": "MIT",
+  "dependencies": {
+    "nonce": "^1.0.4",
+    "request": "^2.88.0"
+  }
+}

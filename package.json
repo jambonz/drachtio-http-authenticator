@@ -1,10 +1,14 @@
 {
   "name": "drachtio-http-authenticator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "a drachtio middleware package that delegates sip authentication to a customer-supplied http api",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jambonz/drachtio-http-authenticator.git"
   },
   "keywords": [
     "drachtio",

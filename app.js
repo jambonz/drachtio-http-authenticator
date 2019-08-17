@@ -65,17 +65,18 @@ function digestChallenge(obj) {
       method: 'POST',
       json: true,
       body: Object.assign({method: req.method}, pieces)
-    }, (err, response) => {
+    }, (err, response, body) => {
       if (err) {
         debug(`Error from calling auth callback: ${err}`);
         return next(err);
       }
+      debug(`received ${response.statusCode} with body ${JSON.stringify(body)}`);
       if (response.statusCode !== 200) {
         debug(`auth callback returned a non-success response: ${response.statusCode}`);
         return res.send(500);
       }
-      if (req.body.status != 'ok') {
-        if (req.body.action === 'block') {
+      if (body.status != 'ok') {
+        if (body.action === 'block') {
           res.send(403, {
             headers: {
               'X-Reason': `detected potential spammer from ${req.source_address}:${req.source_port}`

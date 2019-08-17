@@ -1,5 +1,6 @@
 const request = require('request');
 const nonce = require('nonce')();
+const parseUri = require('drachtio-srf').parseUri;
 const debug = require('debug')('drachtio:http-authenticator');
 
 function parseAuthHeader(hdrValue) {
@@ -41,7 +42,7 @@ function parseAuthHeader(hdrValue) {
 
 function respondChallenge(req, res) {
   const nonceValue = nonce();
-  const uri = req.srf.parseUri(req.uri);
+  const uri = parseUri(req.uri);
   const headers = {
     'WWW-Authenticate': `Digest realm="${uri.host}", algorithm=MD5, qop="auth", nonce="${nonceValue}"`
   };
@@ -64,7 +65,19 @@ function digestChallenge(obj) {
       body: Object.assign({method: req.method}, pieces)
     }, (err, response) => {
       if (err) return next(err);
-      if (response.statusCode !== 200) return res.send(403);
+      if (response.statusCode !== 200) return res.send(500);
+      if (req.body.status != 'ok') {
+        if (req.body.action === 'block') {
+          res.send(403, {
+            headers: {
+              'X-Reason': `detected potential spammer from ${req.source_address}:${req.source_port}`
+            }
+          });
+        }
+        else {
+          res.send(403);
+        }
+      }
       next();
     });
   };

@@ -46,6 +46,7 @@ function respondChallenge(req, res) {
   const headers = {
     'WWW-Authenticate': `Digest realm="${uri.host}", algorithm=MD5, qop="auth", nonce="${nonceValue}"`
   };
+  debug('sending a 401 challenge');
   res.send(401, {headers});
 }
 
@@ -57,6 +58,7 @@ function digestChallenge(obj) {
     if (!req.has('Authorization')) return respondChallenge(req, res);
 
     const pieces = req.authorization = parseAuthHeader(req.get('Authorization'));
+    debug(`parsed authorization header: ${JSON.stringify(pieces)}`);
     request({
       uri,
       auth: obj.auth,
@@ -64,8 +66,14 @@ function digestChallenge(obj) {
       json: true,
       body: Object.assign({method: req.method}, pieces)
     }, (err, response) => {
-      if (err) return next(err);
-      if (response.statusCode !== 200) return res.send(500);
+      if (err) {
+        debug(`Error from calling auth callback: ${err}`);
+        return next(err);
+      }
+      if (response.statusCode !== 200) {
+        debug(`auth callback returned a non-success response: ${response.statusCode}`);
+        return res.send(500);
+      }
       if (req.body.status != 'ok') {
         if (req.body.action === 'block') {
           res.send(403, {

@@ -10,7 +10,11 @@ To admit the request, send a 200 response with a `status` of `ok`, e.g.
 ```
 {"status": "ok"}
 ```
-To deny the request, send a 200 response with a `status` of `fail`.  Optionally, a fail response may include a `msg` attribute and/or an `action` attribute with value `block`.  The latter will cause the IP address that sent the request to be blocked from sending further traffic to the system, e.g.:
+To deny the request, send a 200 response with a `status` of `fail`.  The `status` field MUST be provided.  Optionally, a response MAY include a `msg` attribute, an `expires` attribute, and/or a `blacklist` attribute.  
+
+- The `msg` property is simply a human-readable description of why an authentication failed.
+- The `expires` value provides a value in seconds for the duration of a granted registration.  This value, if provided, must be less than the requested expiration. If not provided, the requested expires value is granted.
+- The `blacklist` property shall contain a number indicating a period of time, in seconds, that the source IP address should be blocked.  A value of -1 means forever.
 ```
 {"status": "fail"}
 ```
@@ -19,7 +23,7 @@ or
 {"status": "fail", "msg": "unknown user"}
 ```
 ```
-{"status": "fail", "action": "block"}
+{"status": "fail", "blaclist": 3600}
 ```
 
 

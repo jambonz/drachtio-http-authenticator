@@ -76,7 +76,8 @@ function digestChallenge(obj) {
         return res.send(500);
       }
       if (body.status != 'ok') {
-        if (body.action === 'block') {
+        if (typeof body.blacklist === 'number') {
+          // TODO: need a more sophisticated way of handling this
           res.send(403, {
             headers: {
               'X-Reason': `detected potential spammer from ${req.source_address}:${req.source_port}`
@@ -87,6 +88,7 @@ function digestChallenge(obj) {
           res.send(403);
         }
       }
+      if (typeof body.expires === 'number') req.authorization.expires = body.expires;
       next();
     });
   };

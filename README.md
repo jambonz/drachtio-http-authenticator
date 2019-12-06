@@ -2,7 +2,7 @@
 
 drachtio middleware that delegates sip authentication to an http api.  This allows, for instance, a multi-tenant sip application server to delegate authentication to a customer api.
 
-The middleware-returning function needs to be invoked with the HTTP URL to call and, optionally, a username and password if HTTP Basic Authentication is being used to protect the endpoint.  
+The middleware-returning function can be invoked with the HTTP URL to call (and optionally, a username and password if HTTP Basic Authentication is being used to protect the endpoint), or a function that returns a Promise resolving to the same.  
 
 An HTTP POST will be made to the specified URL with a JSON body containing the sip method and the components from the Authorization header.  The HTTP server should return a status code of 200 in all cases, containing a JSON body with instructions on whether to admit the request.
 

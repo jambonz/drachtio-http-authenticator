@@ -50,18 +50,40 @@ function respondChallenge(req, res) {
   res.send(401, {headers});
 }
 
-function digestChallenge(obj) {
+function digestChallenge(obj, logger) {
+  let dynamicCallback;
+  if (!logger) logger = {info: () => {}, error: () => {}};
+  if (typeof obj === 'string') obj = {uri: obj};
+  else if (typeof obj === 'function') dynamicCallback = obj;
 
-  const uri = obj.uri || obj.url;
+  return async(req, res, next) => {
+    let auth, uri;
 
-  return (req, res, next) => {
+    if (dynamicCallback) {
+      const sipUri = parseUri(req.uri);
+      try {
+        const obj = await dynamicCallback(sipUri.host);
+        auth = obj.auth;
+        uri = obj.uri || obj.url;
+      } catch (err) {
+        logger.info(`unknown domain ${sipUri.host}, rejecting with 403`);
+        // TODO: allow callee to signal blacklist this source IP ??
+        return res.send(403);
+      }
+    }
+    else {
+      uri = obj.uri || obj.url;
+      auth = obj.auth;
+    }
+
+    // challenge requests without credentials
     if (!req.has('Authorization')) return respondChallenge(req, res);
 
     const pieces = req.authorization = parseAuthHeader(req.get('Authorization'));
     debug(`parsed authorization header: ${JSON.stringify(pieces)}`);
     request({
       uri,
-      auth: obj.auth,
+      auth,
       method: 'POST',
       json: true,
       body: Object.assign({method: req.method}, pieces)
@@ -76,17 +98,8 @@ function digestChallenge(obj) {
         return res.send(500);
       }
       if (body.status != 'ok') {
-        if (typeof body.blacklist === 'number') {
-          // TODO: need a more sophisticated way of handling this
-          res.send(403, {
-            headers: {
-              'X-Reason': `detected potential spammer from ${req.source_address}:${req.source_port}`
-            }
-          });
-        }
-        else {
-          res.send(403);
-        }
+        // TODO: deal with blacklist requests
+        res.send(403);
       }
       if (typeof body.expires === 'number') req.authorization.expires = body.expires;
       next();

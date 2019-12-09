@@ -92,7 +92,7 @@ function digestChallenge(obj, logger) {
       json: true,
       body: Object.assign({
         method: req.method,
-        expires: req.registration
+        expires: req.registration.expires
       }, pieces)
     }, (err, response, body) => {
       if (err) {

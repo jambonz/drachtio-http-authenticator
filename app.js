@@ -85,7 +85,7 @@ function digestChallenge(obj, logger) {
 
     const pieces = req.authorization = parseAuthHeader(req.get('Authorization'));
     debug(`parsed authorization header: ${JSON.stringify(pieces)}`);
-    request({
+    const opts = {
       uri,
       auth,
       method: 'POST',
@@ -94,7 +94,8 @@ function digestChallenge(obj, logger) {
         method: req.method,
         expires: req.registration.expires
       }, pieces)
-    }, (err, response, body) => {
+    };
+    request(opts, (err, response, body) => {
       if (err) {
         debug(`Error from calling auth callback: ${err}`);
         return next(err);

@@ -77,7 +77,7 @@ function digestChallenge(obj, logger) {
     }
     else {
       uri = obj.uri || obj.url;
-      auth = obj.auth;
+      if (obj.auth) auth = Object.assign({}, obj.auth);
     }
 
     // challenge requests without credentials

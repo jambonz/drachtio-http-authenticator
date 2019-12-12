@@ -67,12 +67,15 @@ function digestChallenge(obj, logger) {
       const sipUri = parseUri(req.uri);
       try {
         const obj = await dynamicCallback(sipUri.host);
+        if (!obj) {
+          logger.info(`Unknown realm ${sipUri.host}, rejecting with 403`);
+          return res.send(403);
+        }
         auth = obj.auth;
         uri = obj.uri || obj.url;
       } catch (err) {
-        logger.info(`unknown domain ${sipUri.host}, rejecting with 403`);
-        // TODO: allow callee to signal blacklist this source IP ??
-        return res.send(403);
+        logger.error(`Error ${err}, rejecting with 403`);
+        return next(err);
       }
     }
     else {
@@ -83,7 +86,7 @@ function digestChallenge(obj, logger) {
     // challenge requests without credentials
     if (!req.has('Authorization')) return respondChallenge(req, res);
 
-    const pieces = req.authorization = parseAuthHeader(req.get('Authorization'));
+    const pieces = parseAuthHeader(req.get('Authorization'));
     debug(`parsed authorization header: ${JSON.stringify(pieces)}`);
     const opts = {
       uri,
@@ -109,7 +112,12 @@ function digestChallenge(obj, logger) {
         // TODO: deal with blacklist requests
         res.send(403);
       }
-      if (typeof body.expires === 'number') req.authorization.expires = body.expires;
+
+      // success
+      req.authorization = {
+        challengeResponse: pieces,
+        grant: body
+      };
       next();
     });
   };

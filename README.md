@@ -27,7 +27,10 @@ or
 ```
 
 
-Additionally, for admitted requests, the middleware adds a `req.authorization` attribute which references an object containing the parsed elements of the sip Authorization header.
+Additionally, for admitted requests, the middleware adds a `req.authorization` object which contains two properties:
+- challengeResponse - an object containing the parsed elements of the sip Authorization header, and
+- grant - an object containing the json response received in the 200 OK to the POST request.
+
 ```
 const authenticator = require('drachtio-http-authenticator')({
   url: 'https://example.com/auth',

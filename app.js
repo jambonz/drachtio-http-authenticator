@@ -67,12 +67,15 @@ function digestChallenge(obj, logger) {
       const sipUri = parseUri(req.uri);
       try {
         const obj = await dynamicCallback(sipUri.host);
+        if (!obj) {
+          logger.info(`Unknown realm ${sipUri.host}, rejecting with 403`);
+          return res.send(403);
+        }
         auth = obj.auth;
         uri = obj.uri || obj.url;
       } catch (err) {
-        logger.info(`unknown domain ${sipUri.host}, rejecting with 403`);
-        // TODO: allow callee to signal blacklist this source IP ??
-        return res.send(403);
+        logger.error(`Error ${err}, rejecting with 403`);
+        return next(err);
       }
     }
     else {

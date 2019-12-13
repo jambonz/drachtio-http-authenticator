@@ -58,11 +58,7 @@ function digestChallenge(obj, logger) {
 
   return async(req, res, next) => {
     let auth, uri;
-
-    if (!req.registration) {
-      throw new Error(
-        'drachtio-http-authenticator middleware must come after (requires) drachtio-mw-registration-parser');
-    }
+    const expires = req.registration ? req.registration.expires : null;
     if (dynamicCallback) {
       const sipUri = parseUri(req.uri);
       try {
@@ -95,7 +91,7 @@ function digestChallenge(obj, logger) {
       json: true,
       body: Object.assign({
         method: req.method,
-        expires: req.registration.expires
+        expires
       }, pieces)
     };
     request(opts, (err, response, body) => {

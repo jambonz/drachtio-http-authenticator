@@ -1,6 +1,6 @@
 {
   "name": "drachtio-http-authenticator",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "a drachtio middleware package that delegates sip authentication to a customer-supplied http api",
   "main": "app.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "debug": "^4.1.1",
     "drachtio-srf": "^4.4.14",
     "nonce": "^1.0.4",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "request-debug": "^0.2.0"
   }
 }
